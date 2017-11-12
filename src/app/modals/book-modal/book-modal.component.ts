@@ -74,6 +74,8 @@ export class BookModalComponent implements OnInit {
     .onAction().subscribe(() => {
       this.editMode = false;
       this.bookFormGroup.patchValue(this.book);
+      // capitalize title
+      this.transformTitle();
       this.bookFormGroup.disable();
     })
   }
