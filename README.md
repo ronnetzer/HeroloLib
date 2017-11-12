@@ -17,7 +17,7 @@ import { NytApiModule } from './modules/nyt-api';
     ...,
     NytApiModule.forRoot({ api_key: 'YOUR_API_KEY' })
   ],
-  ....})
+  ...})
 export class AppModule {}
 ```
 
