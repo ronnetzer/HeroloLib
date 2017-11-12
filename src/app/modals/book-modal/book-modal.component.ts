@@ -24,7 +24,7 @@ export class BookModalComponent implements OnInit {
                private snackBar: MatSnackBar,
                private formBuilder: FormBuilder,
                private dialogRef: MatDialogRef<BookModalComponent>,
-               @Inject(MAT_DIALOG_DATA) private data: Book ) {
+               @Inject(MAT_DIALOG_DATA) public data: Book ) {
     
     this.changed = false;
     this.saved = false;

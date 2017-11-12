@@ -27,7 +27,6 @@
 
     <mat-form-field>
       <input matInput formControlName="created_date" placeholder="Created"
-             [max]="maxDate"
              [matDatepicker]="myDatepicker">
       <mat-datepicker-toggle matSuffix [for]="myDatepicker"></mat-datepicker-toggle>
       <mat-datepicker #myDatepicker></mat-datepicker>
@@ -78,7 +77,7 @@
       <mat-icon>clear</mat-icon>
     </button>
   </span>
-  <button *ngIf="!editMode && data" mat-icon-button color="accent" (click)="editBook()">
+  <button *ngIf="!editMode && (!!data)" mat-icon-button color="accent" (click)="editBook()">
     <mat-icon>edit</mat-icon>
   </button>
   <button *ngIf="data" mat-icon-button color="accent" (click)="deleteBook()">

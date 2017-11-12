@@ -61,7 +61,8 @@ export class BooksService {
     //  convert date from string to Date object
     .do(( book: Book ) => {
       book.id = book.primary_isbn13;
-      book.created_date = new Date(book.created_date); //tslint:disable-line
+      book.created_date = new Date(<string>book.created_date);
+      
     })
     .distinct(( book: Book ) => book.title)
     .reduce(( bookArr: Book[], book: Book ) => bookArr.concat(book), [])

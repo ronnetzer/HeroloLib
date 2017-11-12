@@ -12,11 +12,9 @@ import { NgxSiemaOptions, NgxSiemaService } from "ngx-siema";
 import { DomPortalHost, TemplatePortal } from '@angular/cdk/portal';
 
 import { Observable } from "rxjs/Observable";
-import "rxjs/operator/do";
-import "rxjs/operator/delay";
 import { of } from "rxjs/observable/of";
+import "rxjs/operator/delay";
 
-// TODO: Implement OnPush strategy
 @Component({
   selector: 'app-book-carousel',
   templateUrl: './list.component.html',
@@ -89,7 +87,7 @@ export class ListComponent implements OnInit {
     
     // to make the carousel slides render properly we delay it until carousel rendered properly
     this.listPortalHost.attach(listPortal);
-    this.enableRender = of(false, true).delay(10).do(val => console.log(val))
+    this.enableRender = of(false, true).delay(10);
   }
   
   prevBook(): void {

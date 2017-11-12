@@ -72,6 +72,7 @@ import { TitlePipe } from './pipes/title.pipe';
     AppComponent,
     ThumbnailComponent,
     ListComponent,
+    TitlePipe,
     BookModalComponent
   ],
   entryComponents: [

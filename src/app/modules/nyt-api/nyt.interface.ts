@@ -45,7 +45,7 @@ export interface Book {
   book_review_link?: string;
   contributor?: string;
   contributor_note?: string;
-  created_date: string;
+  created_date: Date | string;
   description: string;
   first_chapter_link?: string;
   price?: number;
