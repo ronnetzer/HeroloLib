@@ -54,6 +54,7 @@ $custom-typography: mat-typography-config(
 }
 
 html, body {
+  overflow: hidden;
   padding: 0;
   margin: 0;
 }
