@@ -10,7 +10,7 @@ This application uses NY Times API to fetch data.
 you'll need a key that you can get from [here](https://developer.nytimes.com/signup)
 
 When you recieved your key just import the NYTModule and initialized it with the key
-```html
+```typescript
 import { NytApiModule } from './modules/nyt-api';
 @NgModule({
   imports: [
