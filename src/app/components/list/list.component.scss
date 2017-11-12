@@ -12,7 +12,6 @@
     position: absolute;
     top: 40%;
     height: 100%;
-    cursor: pointer;
 
     .background {
       pointer-events: none;
@@ -24,6 +23,7 @@
       top: -42%;
     }
     mat-icon {
+      cursor: pointer;
       color: #6a6a6a;
       margin: 0 10px;
       position: relative;
