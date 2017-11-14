@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { PortalModule } from "@angular/cdk/portal";
 import { BrowserModule } from '@angular/platform-browser'
 import { HttpClientModule } from '@angular/common/http'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -27,7 +26,7 @@ import {
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 
 // carousel module (https://github.com/lexzhukov/ngx-siema)
-import { NgxSiemaModule } from 'ngx-siema';
+import { NgxSiemaModule, NgxSiemaSlideComponent } from 'ngx-siema';
 
 // NY Times API
 import { NytApiModule } from './modules/nyt-api';
@@ -48,7 +47,6 @@ import { TitlePipe } from './pipes/title.pipe';
   imports: [
     BrowserModule,
     HttpClientModule,
-    PortalModule,
     FormsModule,
     ReactiveFormsModule,
     BrowserAnimationsModule,
@@ -76,6 +74,8 @@ import { TitlePipe } from './pipes/title.pipe';
     BookModalComponent
   ],
   entryComponents: [
+    ThumbnailComponent,
+    NgxSiemaSlideComponent,
     ListComponent,
     BookModalComponent
   ],
