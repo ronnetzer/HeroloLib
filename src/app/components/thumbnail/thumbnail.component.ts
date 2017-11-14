@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Input, ChangeDetectionStrategy, Output, EventEmitter } from '@angular/core';
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 @Component({
@@ -10,6 +10,8 @@ import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 export class ThumbnailComponent implements OnInit {
   @Input('url') coverUrl: string;
   @Input('alt') alt: string;
+  
+  @Output('openDetails') openDetails: EventEmitter<any> = new EventEmitter();
   
   constructor(private sanitize: DomSanitizer) {
   }
