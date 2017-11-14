@@ -33,18 +33,14 @@ export class BooksService {
   
   /**
    * synchronize DB with books BehaviourSubject*/
-  syncDB( data?: Book[] ): void {
-    data ?
+  private syncDB(data: Book[]): void {
       this.http.post('commands/resetDb', this._books.value).subscribe(() => {
         this._books.next(data)
-      }) :
-      this.http.get<Book[]>('api/booksDB').subscribe(( books: Book[] ) => {
-        this._books.next(books)
       });
   }
   
   /**
-   * Get all books as a single array observable, without the lists data
+   * Get all books as a single array observable, without the lists data and duplicates
    * @description simplifies handling all books, while loosing book categories
    * @param date String - Optional, specify NY Times publication date for that week rating
    * @see {@link https://developer.nytimes.com/books_api.json#/Documentation/GET/lists/overview.%7Bformat%7D}
@@ -53,9 +49,9 @@ export class BooksService {
     return this.nytApi.getListsOverview(date)
     .map(( res: NYTResponse ) => res.results.lists)
     //  using concatMap to keep emit order.
-    //  concating to lists
+    //  concat to lists
     .concatMap(( lists: ListOverview[] ) => lists)
-    //  concating to books
+    //  concat to books
     .concatMap(( list: ListOverview ) => list.books)
     //  add id to each book, the ISBN is going to use as id for existing books from NY Times api.
     //  convert date from string to Date object
@@ -87,7 +83,7 @@ export class BooksService {
       if ( filteredBooks.length > 0 ) {
         books[existingIdx] = book;
       } else {
-        books.push(book);
+        books.unshift(book);
       }
       this._books.next(books);
     });
