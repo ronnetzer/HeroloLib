@@ -10,4 +10,4 @@
     <h2 class="mat-h2">Made by Ron Netzer</h2>
   </div>
 </header>
-<app-book-carousel [books]="books$" (details)="openBook($event)"></app-book-carousel>
+<app-book-carousel [books]="books$ | async" (details)="openBook($event)"></app-book-carousel>

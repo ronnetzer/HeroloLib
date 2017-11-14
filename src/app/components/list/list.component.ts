@@ -1,19 +1,14 @@
 import {
-  Component,
-  OnInit,
+  Component, ComponentRef, ComponentFactory, ComponentFactoryResolver,
+  OnInit, OnChanges, SimpleChanges, SimpleChange,
   Input, Output, EventEmitter,
-  ChangeDetectionStrategy,
-  ViewContainerRef, ApplicationRef, ComponentFactoryResolver, Injector, TemplateRef, ViewChild
+  ChangeDetectionStrategy, ChangeDetectorRef, Injector
 } from '@angular/core';
 
 import { Book } from "../../modules/nyt-api/nyt.interface";
-import { NgxSiemaOptions, NgxSiemaService } from "ngx-siema";
+import { NgxSiemaOptions, NgxSiemaService, NgxSiemaSlideComponent } from "ngx-siema";
 
-import { DomPortalHost, TemplatePortal } from '@angular/cdk/portal';
-
-import { Observable } from "rxjs/Observable";
-import { of } from "rxjs/observable/of";
-import "rxjs/operator/delay";
+import { ThumbnailComponent } from "../thumbnail/thumbnail.component";
 
 @Component({
   selector: 'app-book-carousel',
@@ -21,33 +16,22 @@ import "rxjs/operator/delay";
   styleUrls: ['./list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ListComponent implements OnInit {
-  @Input('books') books$: Observable<Book[]>;
+export class ListComponent implements OnInit, OnChanges {
+  @Input('books') books: Book[];
   @Output('details') details: EventEmitter<Book> = new EventEmitter();
   
-  @ViewChild('host', { read: ViewContainerRef }) private host: ViewContainerRef;
-  @ViewChild('listTemplate') private listTemplate: TemplateRef<any>;
-  
-  private books: Book[] = [];
-  private listPortalHost: DomPortalHost;
   private carouselOptions: NgxSiemaOptions;
-  private enableRender: Observable<boolean>;
   
-  constructor( private appRef: ApplicationRef,
+  constructor( private cdRef: ChangeDetectorRef,
                private cfResolver: ComponentFactoryResolver,
                private injector: Injector,
                private carousel: NgxSiemaService ) {
+    
   }
   
   ngOnInit() {
-    if (this.host.element.nativeElement) {
-      this.listPortalHost = new DomPortalHost(
-        this.host.element.nativeElement,
-        this.cfResolver,
-        this.appRef,
-        this.injector
-      );
-    }
+    // handle changes manually
+    this.cdRef.detach();
     
     this.carouselOptions = {
       selector: '.siema',
@@ -59,35 +43,75 @@ export class ListComponent implements OnInit {
       threshold: 20,
       loop: false
     };
-    this.books$.subscribe(books => {
-      this.books = books;
-      
-      this.generateList();
-    });
+    
   }
   
-  generateList() {
-    // generating carousel "on the fly" to overcome NgxSiema bug when content changed
-    let listEV = this.listTemplate.createEmbeddedView({
-      books: this.books,
-      openDetails: this.openDetails,
-      carouselOptions: this.carouselOptions,
-      details: this.details
-    });
-    
-    let listPortal = new TemplatePortal(
-      this.listTemplate,
-      this.host,
-      listEV.context
-    );
-    
-    if ( this.listPortalHost.hasAttached() ) {
-      this.listPortalHost.detach();
+  ngOnChanges( changes: SimpleChanges ) {
+    //  detecting changes in books to see if any book removed/added/updated
+    let books: SimpleChange = changes['books'];
+    if ( !books.firstChange && books.currentValue.length > 0 ) {
+      // init data
+      if ( books.previousValue.length == 0 ) return this.cdRef.detectChanges();
+      
+      // book deleted
+      if ( books.previousValue.length > books.currentValue.length ) {
+        let deletedIdx: number;
+        books.previousValue.some(( book: Book, idx: number ) => {
+          if ( books.currentValue[idx] ) {
+            if ( book.id !== books.currentValue[idx].id ) {
+              deletedIdx = idx;
+              return true;
+            }
+          }
+        });
+        return this.carousel.remove(deletedIdx);
+      }
+      //  book added
+      else if ( books.previousValue.length < books.currentValue.length ) {
+        // new book will always be at index 0;
+        let newBookNode = this.createSlide(books.currentValue[0]);
+        this.carousel.prepend(newBookNode);
+        return this.carousel.goTo(0);
+      }
+      // book changed
+      else {
+        // scan array for any changed book (deep comparison)
+        let changedBookNode, changedIdx;
+        books.currentValue.some(( book: Book, idx: number ) => {
+          for ( let prop in book ) {
+            if ( book[prop] !== books.previousValue[idx][prop] ) {
+              changedIdx = idx;
+              return true;
+            }
+          }
+        });
+        changedBookNode = this.createSlide(books.currentValue[changedIdx]);
+        this.carousel.remove(changedIdx);
+        return this.carousel.insert(changedBookNode, changedIdx);
+      }
     }
+  }
+  
+  createSlide( bookData: Book ): HTMLElement {
+    let thumbnailComponentFactory: ComponentFactory<ThumbnailComponent>,
+      slideComponentFactory: ComponentFactory<NgxSiemaSlideComponent>,
+      thumbnailComponent: ComponentRef<ThumbnailComponent>;
     
-    // to make the carousel slides render properly we delay it until carousel rendered properly
-    this.listPortalHost.attach(listPortal);
-    this.enableRender = of(false, true).delay(10);
+    // create factories
+    thumbnailComponentFactory = this.cfResolver.resolveComponentFactory(ThumbnailComponent);
+    slideComponentFactory = this.cfResolver.resolveComponentFactory(NgxSiemaSlideComponent);
+    
+    // create thumbnail
+    thumbnailComponent = thumbnailComponentFactory.create(this.injector);
+    
+    // add content
+    thumbnailComponent.instance.coverUrl = bookData.book_image;
+    thumbnailComponent.instance.alt = bookData.title;
+    thumbnailComponent.instance.openDetails.subscribe(() => this.openDetails(bookData));
+    thumbnailComponent.changeDetectorRef.detectChanges();
+    
+    // create and return slide component with thumbnail as projectableNode
+    return slideComponentFactory.create(this.injector, [[thumbnailComponent.location.nativeElement]]).location.nativeElement;
   }
   
   prevBook(): void {
